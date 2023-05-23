@@ -90,6 +90,11 @@ fn write_dir(
 }
 
 fn restore(file: PathBuf) -> anyhow::Result<()> {
+    if !file.exists() {
+        println!("not found:{}", file.display());
+        return Ok(());
+    }
+
     let cargo_home = var("CARGO_HOME")?;
     let file = File::open(file)?;
     let mut archive = zip::ZipArchive::new(file)?;
