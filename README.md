@@ -4,7 +4,6 @@ cargo restore for custom docker ci
 
 list of backup directories:
 ```shell
-   $CARGO_HOME/bin
    $CARGO_HOME/registry/index/
    $CARGO_HOME/registry/cache/
    $CARGO_HOME/git/db/

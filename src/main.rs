@@ -10,7 +10,6 @@ use zip::{CompressionMethod, ZipWriter};
 #[derive(Parser)]
 pub enum Opt {
     /// Bak
-    /// $CARGO_HOME/bin
     /// $CARGO_HOME/registry/index/
     /// $CARGO_HOME/registry/cache/
     /// $CARGO_HOME/git/db/
@@ -44,15 +43,11 @@ fn main() -> anyhow::Result<()> {
 fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyhow::Result<()> {
     let cargo_home = var("CARGO_HOME")?;
     println!("Start bak CARGO_HOME:{}", cargo_home);
-    let bin = PathBuf::from(format!("{}/bin/", cargo_home));
     let registry_index = PathBuf::from(format!("{}/registry/index/", cargo_home));
     let registry_cache = PathBuf::from(format!("{}/registry/cache/", cargo_home));
     let git_db = PathBuf::from(format!("{}/git/db/", cargo_home));
     let mut zip = ZipWriter::new(File::create(save_path)?);
 
-    if bin.exists() {
-        write_dir(compression_level, &cargo_home, bin, &mut zip)?;
-    }
     if registry_index.exists() {
         write_dir(compression_level, &cargo_home, git_db, &mut zip)?;
     }

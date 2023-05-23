@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+#### Features
+* remove bin
+
 ## 0.1.2
 #### Features
 * add exists cargo 
