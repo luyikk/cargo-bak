@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+#### Features
+* fix db exits
+
 ## 0.1.3
 #### Features
 * remove bin

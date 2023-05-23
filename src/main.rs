@@ -48,7 +48,7 @@ fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyho
     let git_db = PathBuf::from(format!("{}/git/db/", cargo_home));
     let mut zip = ZipWriter::new(File::create(save_path)?);
 
-    if registry_index.exists() {
+    if git_db.exists() {
         write_dir(compression_level, &cargo_home, git_db, &mut zip)?;
     }
     if registry_cache.exists() {
