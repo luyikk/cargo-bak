@@ -50,10 +50,18 @@ fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyho
     let git_db = PathBuf::from(format!("{}/git/db/", cargo_home));
     let mut zip = ZipWriter::new(File::create(save_path)?);
 
-    write_dir(compression_level, &cargo_home, bin, &mut zip)?;
-    write_dir(compression_level, &cargo_home, git_db, &mut zip)?;
-    write_dir(compression_level, &cargo_home, registry_cache, &mut zip)?;
-    write_dir(compression_level, &cargo_home, registry_index, &mut zip)?;
+    if bin.exists() {
+        write_dir(compression_level, &cargo_home, bin, &mut zip)?;
+    }
+    if registry_index.exists() {
+        write_dir(compression_level, &cargo_home, git_db, &mut zip)?;
+    }
+    if registry_cache.exists() {
+        write_dir(compression_level, &cargo_home, registry_cache, &mut zip)?;
+    }
+    if registry_index.exists() {
+        write_dir(compression_level, &cargo_home, registry_index, &mut zip)?;
+    }
 
     zip.finish()?;
     println!("finish");

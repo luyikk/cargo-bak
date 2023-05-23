@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+#### Features
+* add exists cargo 
+
 ## 0.1.1
 #### Features
 * add exists zip file
