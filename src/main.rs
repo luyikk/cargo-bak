@@ -9,7 +9,7 @@ use zip::{CompressionMethod, ZipWriter};
 
 #[derive(Parser)]
 pub enum Opt {
-    /// Bak
+    /// Backup
     /// $CARGO_HOME/registry/index/
     /// $CARGO_HOME/registry/cache/
     /// $CARGO_HOME/git/db/
@@ -20,6 +20,7 @@ pub enum Opt {
         #[arg(long, short, value_parser, default_value = "0")]
         compression_level: Option<i32>,
     },
+    /// Restore cargo backup zip to $CARGO_HOME
     Restore {
         #[arg(value_parser)]
         path: PathBuf,
@@ -42,11 +43,11 @@ fn main() -> anyhow::Result<()> {
 
 fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyhow::Result<()> {
     let cargo_home = var("CARGO_HOME")?;
-    println!("Start bak CARGO_HOME:{}", cargo_home);
+    println!("Start Backup $CARGO_HOME:{}", cargo_home);
     let registry_index = PathBuf::from(format!("{}/registry/index/", cargo_home));
     let registry_cache = PathBuf::from(format!("{}/registry/cache/", cargo_home));
     let git_db = PathBuf::from(format!("{}/git/db/", cargo_home));
-    let mut zip = ZipWriter::new(File::create(save_path)?);
+    let mut zip = ZipWriter::new(File::create(&save_path)?);
 
     if git_db.exists() {
         write_dir(compression_level, &cargo_home, git_db, &mut zip)?;
@@ -59,7 +60,7 @@ fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyho
     }
 
     zip.finish()?;
-    println!("finish");
+    println!("Backup finish:{}",save_path.display());
     Ok(())
 }
 
@@ -92,18 +93,17 @@ fn write_dir(
     Ok(())
 }
 
-fn restore(file: PathBuf) -> anyhow::Result<()> {
-    if !file.exists() {
-        println!("not found:{}", file.display());
+fn restore(path: PathBuf) -> anyhow::Result<()> {
+    if !path.exists() {
+        println!("not found path:{}", path.display());
         return Ok(());
     }
-
     let cargo_home = var("CARGO_HOME")?;
-    let file = File::open(file)?;
+    let file = File::open(&path)?;
     let mut archive = zip::ZipArchive::new(file)?;
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
-        let outpath = match file.enclosed_name() {
+        let out_path = match file.enclosed_name() {
             Some(path) => PathBuf::from(format!("{}/{}", cargo_home, path.display())),
             None => continue,
         };
@@ -116,22 +116,22 @@ fn restore(file: PathBuf) -> anyhow::Result<()> {
         }
 
         if (*file.name()).ends_with('/') {
-            println!("File {} extracted to \"{}\"", i, outpath.display());
-            fs::create_dir_all(&outpath)?;
+            println!("File {} extracted to \"{}\"", i, out_path.display());
+            fs::create_dir_all(&out_path)?;
         } else {
             println!(
                 "File {} extracted to \"{}\" ({} bytes)",
                 i,
-                outpath.display(),
+                out_path.display(),
                 file.size()
             );
-            if let Some(p) = outpath.parent() {
+            if let Some(p) = out_path.parent() {
                 if !p.exists() {
                     fs::create_dir_all(p)?;
                 }
             }
-            let mut outfile = File::create(&outpath).unwrap();
-            io::copy(&mut file, &mut outfile).unwrap();
+            let mut outfile = File::create(&out_path)?;
+            io::copy(&mut file, &mut outfile)?;
         }
 
         // Get and Set permissions
@@ -140,10 +140,11 @@ fn restore(file: PathBuf) -> anyhow::Result<()> {
             use std::os::unix::fs::PermissionsExt;
 
             if let Some(mode) = file.unix_mode() {
-                fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
+                fs::set_permissions(&out_path, fs::Permissions::from_mode(mode))?;
             }
         }
     }
 
+    println!("Restore finish:{}",path.display());
     Ok(())
 }

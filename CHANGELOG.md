@@ -1,5 +1,10 @@
 # Changelog
 
+
+# 0.1.5
+#### Features
+* Optimize output
+
 ## 0.1.4
 #### Features
 * fix db exits
