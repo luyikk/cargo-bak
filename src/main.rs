@@ -60,7 +60,7 @@ fn save_cargo_cache(save_path: PathBuf, compression_level: Option<i32>) -> anyho
     }
 
     zip.finish()?;
-    println!("Backup finish:{}",save_path.display());
+    println!("Backup finish:{}", save_path.display());
     Ok(())
 }
 
@@ -145,6 +145,6 @@ fn restore(path: PathBuf) -> anyhow::Result<()> {
         }
     }
 
-    println!("Restore finish:{}",path.display());
+    println!("Restore finish:{}", path.display());
     Ok(())
 }
